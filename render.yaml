@@ -2,7 +2,7 @@ services:
   - type: web
     name: devlens-ai-backend
     env: node
-    plan: starter
+    plan: free
     buildCommand: npm install && npm run build -w @devlens/shared && npm run build -w @devlens/backend
     startCommand: npm run start -w @devlens/backend
     autoDeploy: true

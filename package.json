@@ -1,0 +1,18 @@
+{
+  "name": "devlens-ai",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @devlens/shared && npm run build -w @devlens/backend && npm run build -w @devlens/extension",
+    "dev:backend": "npm run dev -w @devlens/backend",
+    "dev:extension": "npm run dev -w @devlens/extension",
+    "typecheck": "npm run typecheck -w @devlens/shared && npm run typecheck -w @devlens/backend && npm run typecheck -w @devlens/extension"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3"
+  }
+}

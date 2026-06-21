@@ -1,0 +1,16 @@
+import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
+
+export type JwtPayload = {
+  userId: string;
+  email: string;
+  plan: "free" | "pro";
+};
+
+export function signToken(payload: JwtPayload) {
+  return jwt.sign(payload, env.jwtSecret, { expiresIn: env.jwtExpiresIn as jwt.SignOptions["expiresIn"] });
+}
+
+export function verifyToken(token: string) {
+  return jwt.verify(token, env.jwtSecret) as JwtPayload;
+}

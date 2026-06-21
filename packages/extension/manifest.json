@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "DevLens AI",
+  "version": "0.1.0",
+  "description": "Understand GitHub repositories instantly with AI.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["assets/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://github.com/*",
+    "http://localhost:4000/*",
+    "https://*.onrender.com/*"
+  ],
+  "permissions": ["storage", "activeTab"],
+  "icons": {}
+}

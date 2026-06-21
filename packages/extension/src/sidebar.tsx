@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { createRoot } from "react-dom/client";
 import mermaid from "mermaid";
 import type {
   AskRepositoryResponse,
@@ -38,6 +39,7 @@ type SidebarAppProps = {
   pageContext: PageContext;
 };
 
+const SIDEBAR_CONTEXT_KEY = "devlens:sidebar-context";
 const cacheKey = (repositoryUrl: string, feature: string) => `devlens:${feature}:${repositoryUrl}`;
 
 const tabs = [
@@ -53,7 +55,11 @@ const tabs = [
 type TabId = (typeof tabs)[number]["id"];
 
 function SkeletonBlock() {
-  return <div className="h-24 animate-pulse rounded-xl border border-slate-800 bg-slate-900/80" />;
+  return (
+    <div className="flex h-24 animate-pulse items-center justify-center rounded-xl border border-slate-800 bg-slate-900/80 text-sm font-semibold text-slate-300">
+      Working...
+    </div>
+  );
 }
 
 function ResultCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -375,4 +381,46 @@ export function SidebarApp({ pageContext }: SidebarAppProps) {
       </div>
     </div>
   );
+}
+
+function SidebarBootstrap() {
+  const [pageContext, setPageContext] = useState<PageContext | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const context = await getStorage<PageContext>(SIDEBAR_CONTEXT_KEY);
+        if (!context) {
+          throw new Error("Open a GitHub repository page to load DevLens AI.");
+        }
+        setPageContext(context);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "Unable to load repository context.");
+      }
+    })();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-4 text-sm text-rose-200">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">{error}</div>
+      </div>
+    );
+  }
+
+  if (!pageContext) {
+    return (
+      <div className="min-h-screen bg-slate-950 p-4 text-sm text-slate-300">
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">Loading DevLens AI...</div>
+      </div>
+    );
+  }
+
+  return <SidebarApp pageContext={pageContext} />;
+}
+
+const root = document.getElementById("root");
+if (root) {
+  createRoot(root).render(<SidebarBootstrap />);
 }

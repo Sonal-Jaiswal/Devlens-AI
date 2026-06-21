@@ -23,5 +23,11 @@
     "https://*.onrender.com/*"
   ],
   "permissions": ["storage", "activeTab"],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html", "assets/*"],
+      "matches": ["https://github.com/*"]
+    }
+  ],
   "icons": {}
 }

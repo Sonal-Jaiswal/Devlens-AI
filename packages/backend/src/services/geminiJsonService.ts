@@ -17,6 +17,23 @@ function extractJson(text: string) {
   return trimmed;
 }
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeout: NodeJS.Timeout | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_resolve, reject) => {
+        timeout = setTimeout(() => reject(new Error("Gemini request timed out")), timeoutMs);
+      })
+    ]);
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 export async function generateJsonResponse<T>(options: {
   prompt: string;
   fallback: T;
@@ -28,13 +45,16 @@ export async function generateJsonResponse<T>(options: {
   try {
     const client = new GoogleGenerativeAI(env.geminiApiKey);
     const model = client.getGenerativeModel({ model: env.geminiModel });
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: options.prompt }] }],
-      generationConfig: {
-        temperature: 0.2,
-        responseMimeType: "application/json"
-      }
-    });
+    const result = await withTimeout(
+      model.generateContent({
+        contents: [{ role: "user", parts: [{ text: options.prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          responseMimeType: "application/json"
+        }
+      }),
+      45000
+    );
 
     const parsed = JSON.parse(extractJson(result.response.text())) as T;
     return parsed;
